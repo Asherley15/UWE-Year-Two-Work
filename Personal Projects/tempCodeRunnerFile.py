@@ -1,1 +1,1 @@
-    print("\n")
+chararray

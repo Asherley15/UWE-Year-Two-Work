@@ -1,14 +1,23 @@
 import numpy as np
 import random
 import time
-from numpy.random import rand
+from numpy.random import f, rand
 
 grid = np.empty(shape=(3, 3), dtype=str)
 
+notwon = True
+
 
 def fullboard():
-    if np.all((grid != "")):
-        print("Board is full, Game over!")
+    check = ''
+    if check in grid:
+        global notwon
+        notwon = True
+    else:
+        print("Board is full, its a draw!")
+        print(grid)
+        notwon = False
+        exit()
 
 
 def pcturn():
@@ -21,36 +30,58 @@ def pcturn():
 
 
 def userturn():
-    row = int(input("Which row do you wish to move X into?"))
-    col = int(input("Which column do you wish to move X into?"))
-    if grid[row - 1, col - 1] != 'X' or 'O':
+    valid = True
+    valid2 = True
+    while valid:
+        try:
+            row = int(input("Which row do you wish to move X into?"))
+            if 0 > row or row > 3:
+                print("Please enter a valid input.")
+            else:
+                valid = False
+        except ValueError:
+            print("Please enter a valid number")
+            continue
+    while valid2:
+        try:
+            col = int(input("Which column do you wish to move X into?"))
+            if 0 > col or col > 3:
+                print("Please enter a valid input.")
+            else:
+                valid2 = False
+        except ValueError:
+            print("Please enter a valid number")
+            continue
+
+    if grid[row - 1, col - 1] != 'X' and grid[row - 1, col - 1] != 'O':
         grid[row - 1, col - 1] = 'X'
-    else:
-        print("That Square is taken, choose a valid option.")
+    elif grid[row - 1, col - 1] == 'X' or grid[row - 1, col - 1] == 'O':
+        print("Please enter an empty square")
         userturn()
 
 
-print(grid)
-
-
-notwon = True
-while notwon == True:
-    if (fullboard()):
+while True:
+    start = input("Do you wish to play?")
+    if start == "Y" or 'y':
         break
+print(grid)
+while notwon == True:
+    fullboard()
     userturn()
     if (grid[0, 0] == 'X' and grid[0, 1] == 'X' and grid[0, 2] == 'X'
-        or grid[0, 0] == 'X' and grid[1, 1] == 'X' and grid[2, 2] == 'X'
-        or grid[0, 0] == 'X' and grid[1, 0] == 'X' and grid[2, 0] == 'X'
-        or grid[0, 1] == 'X' and grid[1, 1] == 'X' and grid[2, 1] == 'X'
-        or grid[0, 2] == 'X' and grid[1, 2] == 'X' and grid[2, 2] == 'X'
-        or grid[0, 2] == 'X' and grid[1, 1] == 'X' and grid[2, 0] == 'X'
-        or grid[1, 0] == 'X' and grid[1, 1] == 'X' and grid[1, 2] == 'X'
+            or grid[0, 0] == 'X' and grid[1, 1] == 'X' and grid[2, 2] == 'X'
+            or grid[0, 0] == 'X' and grid[1, 0] == 'X' and grid[2, 0] == 'X'
+            or grid[0, 1] == 'X' and grid[1, 1] == 'X' and grid[2, 1] == 'X'
+            or grid[0, 2] == 'X' and grid[1, 2] == 'X' and grid[2, 2] == 'X'
+            or grid[0, 2] == 'X' and grid[1, 1] == 'X' and grid[2, 0] == 'X'
+            or grid[1, 0] == 'X' and grid[1, 1] == 'X' and grid[1, 2] == 'X'
             or grid[2, 0] == 'X' and grid[2, 1] == 'X' and grid[2, 2] == 'X'):
         print(grid)
         print("You win!")
         notwon = False
         break
     else:
+        fullboard()
         print(grid)
         print("Robot is thinking...")
         # time.sleep(2)

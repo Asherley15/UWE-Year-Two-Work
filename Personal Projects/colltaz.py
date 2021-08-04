@@ -12,7 +12,7 @@ x = np.array([counter])
 y = np.array([num])
 
 # Set program to stop once 1 has been reached, beyond this an infinite 4-2-1 loop is formed.
-while num != 1:
+while counter < 300:
     # Increment Counter
     counter += 1
 

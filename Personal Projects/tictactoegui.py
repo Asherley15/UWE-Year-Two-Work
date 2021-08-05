@@ -1,4 +1,7 @@
 from tkinter import *
+import tkinter
+import tkinter.messagebox
+from typing import Counter
 import numpy as np
 import random
 import time
@@ -15,17 +18,44 @@ count = 0
 print(grid)
 x = False
 pctur = False
+notwon = True
+valid = True
+counter = 0
 
 
 def b_click(i, j, b):
-    global pctur, x, selection, buttons
+    global pctur, x, selection, buttons, notwon
+
     if pctur == False:
         if grid[i, j] != "X" and grid[i, j, ] != 'O':
-            grid[i, j] = "X"
+            grid[i, j] = str("X")
             print(grid)
-            b["text"] = 'X'
+            b["text"] = str('X')
             b["fg"] = "Red"
+            if (grid[0, 0] == 'X' and grid[0, 1] == 'X' and grid[0, 2] == 'X'
+                or grid[0, 0] == 'X' and grid[1, 1] == 'X' and grid[2, 2] == 'X'
+                or grid[0, 0] == 'X' and grid[1, 0] == 'X' and grid[2, 0] == 'X'
+                or grid[0, 1] == 'X' and grid[1, 1] == 'X' and grid[2, 1] == 'X'
+                or grid[0, 2] == 'X' and grid[1, 2] == 'X' and grid[2, 2] == 'X'
+                or grid[0, 2] == 'X' and grid[1, 1] == 'X' and grid[2, 0] == 'X'
+                or grid[1, 0] == 'X' and grid[1, 1] == 'X' and grid[1, 2] == 'X'
+                    or grid[2, 0] == 'X' and grid[2, 1] == 'X' and grid[2, 2] == 'X'):
+                print(grid)
+                print("You win!")
+                b["text"] = str('X')
+                b["fg"] = "Red"
+                tkinter.messagebox.showinfo("winner", "Congrats, you win!")
 
+            counter = 0
+            for t in grid:
+
+                for p in t:
+                    if p == '':
+                        counter += 1
+
+            if counter == 0:
+                tkinter.messagebox.showinfo("winner", "Its a draw!")
+                exit()
             global buttons
             buttons.remove(b)
             pctur = True
@@ -42,19 +72,28 @@ def b_click(i, j, b):
 
         if x == True:
             if grid[i, j] != "X" and grid[i, j] != 'O':
-                grid[i, j] = "X"
                 grid[i, j] = "O"
                 x = False
-                buttons.remove(b)
-                print(grid)
-                b["text"] = 'O'
-                b["fg"] = "Green"
-                x = False
-                pctur = False
+                if(grid[0, 0] == 'O' and grid[0, 1] == 'O' and grid[0, 2] == 'O'
+                   or grid[0, 0] == 'O' and grid[1, 1] == 'O' and grid[2, 2] == 'O'
+                        or grid[0, 0] == 'O' and grid[1, 0] == 'O' and grid[2, 0] == 'O'
+                        or grid[0, 1] == 'O' and grid[1, 1] == 'O' and grid[2, 1] == 'O'
+                        or grid[0, 2] == 'O' and grid[1, 2] == 'O' and grid[2, 2] == 'O'
+                        or grid[0, 2] == 'O' and grid[1, 1] == 'O' and grid[2, 0] == 'O'
+                        or grid[1, 0] == 'O' and grid[1, 1] == 'O' and grid[1, 2] == 'O'
+                        or grid[2, 0] == 'O' and grid[2, 1] == 'O' and grid[2, 2] == 'O'):
+                    b["text"] = 'O'
+                    b["fg"] = "Green"
+                    tkinter.messagebox.showinfo(
+                        "Loser", "You Lose, better luck next time!")
+                    notwon = False
 
-            elif grid[i, j] == 'X' or grid[i, j] == 'O':
-                print("It guessed.")
-                x = False
+            buttons.remove(b)
+            print(grid)
+            b["text"] = 'O'
+            b["fg"] = "Green"
+            x = False
+            pctur = False
 
 
 b1 = Button(root, text=" ", font=("Helvetica", 20), height=3,

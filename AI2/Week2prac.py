@@ -5,6 +5,7 @@ import numpy as np
 
 N = 10
 P = 50
+(((((({{{{}}}}))))))
 
 
 class individual:
@@ -38,25 +39,28 @@ def test_func(pop):
 
 offspring = []
 
-for i in range(0, P):
-    parent1 = random.randint(0, P - 1)
-    off1 = population[parent1]
-    parent2 = random.randint(0, P - 1)
-    off2 = population[parent2]
 
-    if off1.fitness > off2.fitness:
-        offspring.append(off1)
+def breed_pop(population):
+    global offspring
+    offspring.clear()
+    for i in range(0, P):
+        parent1 = random.randint(0, P - 1)
+        off1 = population[parent1]
+        parent2 = random.randint(0, P - 1)
+        off2 = population[parent2]
 
-    else:
-        offspring.append(off2)
-    offspring
+        if off1.fitness > off2.fitness:
+            offspring.append(off1)
+
+        else:
+            offspring.append(off2)
+    return offspring
 
 
+breed_pop(population)
 if test_func(offspring) > test_func(population):
     print('Breed successful')
     population = offspring
 else:
+    breed_pop(population)
     print('Breed failed')
-    population = population
-
-test_func(population)

@@ -5,14 +5,12 @@ import numpy as np
 
 N = 10
 P = 50
-(((((({{{{}}}}))))))
 
 
 class individual:
-    def __init__(self) -> None:
-        pass
-    gene = []
-    fitness = 0
+    def __init__(self):
+        gene = [] * N
+        fitness = 0
 
 
 population = []
@@ -26,41 +24,44 @@ for x in range(0, P):
     population.append(newind)
 
 
-def test_func(pop):
+def test_func(ind):
     fitness = 0
-    for x in pop:
-        for y in x.gene:
-            if y == 1:
-                fitness += 1
-
-    print('Total fitness:', fitness)
+    for x in range(N):
+        fitness = fitness + ind.gene[x]
     return fitness
 
 
+counter = -1
+for x in population:
+    counter += 1
+    population[counter].fitness = test_func(x)
+
+
 offspring = []
+for i in range(0, P):
+    parent1 = random.randint(0, P - 1)
+    off1 = population[parent1]
+    parent2 = random.randint(0, P - 1)
+    off2 = population[parent2]
+    if off1.fitness > off2.fitness:
+        offspring.append(off1)
 
+    else:
+        offspring.append(off2)
 
-def breed_pop(population):
-    global offspring
-    offspring.clear()
-    for i in range(0, P):
-        parent1 = random.randint(0, P - 1)
-        off1 = population[parent1]
-        parent2 = random.randint(0, P - 1)
-        off2 = population[parent2]
+totalfitpop = 0
+totalfitoff = 0
 
-        if off1.fitness > off2.fitness:
-            offspring.append(off1)
+counter = -1
+for x in population:
+    counter += 1
+    totalfitpop += population[counter].fitness
 
-        else:
-            offspring.append(off2)
-    return offspring
-
-
-breed_pop(population)
-if test_func(offspring) > test_func(population):
-    print('Breed successful')
-    population = offspring
-else:
-    breed_pop(population)
-    print('Breed failed')
+counter = -1
+for x in offspring:
+    counter += 1
+    totalfitoff += offspring[counter].fitness
+print("Parent values: ", totalfitpop)
+print("Offspring values: ", totalfitoff)
+if totalfitoff > totalfitpop:
+    print("Success!")

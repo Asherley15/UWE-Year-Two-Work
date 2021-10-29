@@ -5,8 +5,8 @@ import numpy as np
 import copy
 import statistics
 
-N = 50
-P = 50
+N = 10
+P = 10
 fitnessscore = []
 totalfitmut = 0
 
@@ -29,7 +29,7 @@ avgaxis = np.array([])
 for gen in range(0, P):
     tempgene = []
     for y in range(0, N):
-        tempgene.append(random.randint(0, 1))
+        tempgene.append(random.random())
     newind = individual()
     newind.gene = tempgene.copy()
     population.append(newind)
@@ -97,8 +97,7 @@ for gencheck in range(0, runs):
                 offspring[i + 1].gene[k] = tempgene[k]
 
         mutatedgenes = []
-        mutrate = 0.011
-        print("GENLEVEL:", mutrate)
+        mutrate = 0.01
         mutcheck = 0
         total = 0
         for i in range(0, P):
@@ -129,9 +128,6 @@ for gencheck in range(0, runs):
             if x.fitness > bestbaby.fitness:
                 bestbaby = x
 
-
-# bestbaby=individual()      bestbaby=population[] for x in population if x >bestbaby bestbaby=x
-# Inverse this to find worse and overwrite
         population = copy.deepcopy(mutatedgenes)
 
         worsebaby = individual()
@@ -160,19 +156,14 @@ for gencheck in range(0, runs):
         generation.append(gencheck)
 
         xaxis = np.append(xaxis, [genz])
+        for x in population:
+            print(x.gene)
         plt.plot(xaxis, yaxis, avgscorelist)
     else:
         break
 
 z = 0
-counter = 0
-for z in avgscorelist:
-    counter += 1
-    print("Generation: ", counter, "  avg:", z)
-counter = 0
-for z in popscorelist:
-    counter += 1
-    print("Generation: ", counter, "  best:", z)
+
 plt.xlabel('Generations Ran')
 plt.ylabel("Fitness")
 plt.title("Fitness (Best and Average)")

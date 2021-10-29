@@ -45,11 +45,12 @@ def test_func(ind):
 xaxis = np.array([])
 totalfitpop = 0
 genz = 0
-runs = 100
+runs = 500
 
 
 for gencheck in range(0, runs):
-    if popbestscore < 50:
+    if popbestscore != 50:
+        popscorelist = []
         genz += 1
         counter = -1
         for x in population:
@@ -96,15 +97,18 @@ for gencheck in range(0, runs):
                 offspring[i + 1].gene[k] = tempgene[k]
 
         mutatedgenes = []
-        mutrate = (gencheck / runs) * 1.5
+        mutrate = 0.01
         print("GENLEVEL:", mutrate)
+        mutcheck = 0
+        total = 0
         for i in range(0, P):
             newind = individual()
             newind.gene = []
             for j in range(0, N):
                 mutprob = random.random()
                 gene = offspring[i].gene[j]
-                if (mutprob * 100) < mutrate:
+                total += 1
+                if (mutprob) < (mutrate):
                     if (gene == 1):
                         gene = 0
                     else:
@@ -115,15 +119,27 @@ for gencheck in range(0, runs):
         totalfitmut = 0
         counter = -1
 
-        bestscore = 0
-
         for x in mutatedgenes:
             counter += 1
             totalfitmut += test_func(x)
-            if test_func(x) > bestscore:
-                bestscore = test_func(x)
 
+        bestbaby = individual()
+        bestbaby = population[0]
+        for x in population:
+            if x.fitness > bestbaby.fitness:
+                bestbaby = x
+
+
+# bestbaby=individual()      bestbaby=population[] for x in population if x >bestbaby bestbaby=x
+# Inverse this to find worse and overwrite
         population = copy.deepcopy(mutatedgenes)
+
+        worsebaby = individual()
+        worsebaby = population[0]
+        for x in population:
+            if x.fitness < worsebaby.fitness:
+                worsebaby = x
+        worsebaby = bestbaby
         fitnessscore.append(totalfitmut)
 
         counter = -1
@@ -131,12 +147,13 @@ for gencheck in range(0, runs):
             counter += 1
             population[counter].fitness = test_func(x)
 
-        popbestscore = 0
         for x in population:
-            if x.fitness > popbestscore:
+            popscorelist.append(x.fitness)
+            if x.fitness >= popbestscore:
                 popbestscore = x.fitness
+
         yaxis = np.append(yaxis, popbestscore)
-        popscorelist.append(popbestscore)
+
         avgpopscore = statistics.mean(popscorelist)
         avgscorelist = np.append(avgscorelist, avgpopscore)
         generation = []
@@ -144,9 +161,9 @@ for gencheck in range(0, runs):
 
         xaxis = np.append(xaxis, [genz])
         plt.plot(xaxis, yaxis, avgscorelist)
-
     else:
         break
+
 z = 0
 counter = 0
 for z in avgscorelist:
@@ -159,4 +176,5 @@ for z in popscorelist:
 plt.xlabel('Generations Ran')
 plt.ylabel("Fitness")
 plt.title("Fitness (Best and Average)")
+
 plt.show()

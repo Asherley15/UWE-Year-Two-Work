@@ -5,14 +5,14 @@ import numpy as np
 import copy
 import statistics
 
-N = 50
-P = 50
+N = 10
+P = 10
 fitnessscore = []
 totalfitmut = 0
 
 popscorelist = []
 avgscorelist = np.array([])
-popbestscore = 0
+popbestscore = N
 
 
 class individual:
@@ -45,7 +45,7 @@ def test_func(ind):
 xaxis = np.array([])
 totalfitpop = 0
 genz = 0
-runs = 500
+runs = 300
 
 
 for gencheck in range(0, runs):
@@ -63,10 +63,10 @@ for gencheck in range(0, runs):
         parent2 = random.randint(0, P - 1)
         off2 = population[parent2]
         if off1.fitness > off2.fitness:
-            offspring.append(off1)
+            offspring.append(off2)
 
         else:
-            offspring.append(off2)
+            offspring.append(off1)
         counter = -1
 
     for x in offspring:
@@ -96,7 +96,7 @@ for gencheck in range(0, runs):
             offspring[i + 1].gene[k] = tempgene[k]
 
     mutatedgenes = []
-    mutrate = 0.0275
+    mutrate = 0.3
     mutcheck = 0
     alter = random.random()
     flip = 0.5
@@ -109,10 +109,12 @@ for gencheck in range(0, runs):
             if (mutprob) < (mutrate):
                 if random.random() < flip:
                     gene += alter
-                    if gene > 1:
-                        gene = 1
+                    if gene > 5.12:
+                        gene = 5.12
                 else:
                     gene -= alter
+                    if gene < -5.12:
+                        gene = -5.12
             newind.gene.append(gene)
         mutatedgenes.append(newind)
 
@@ -126,7 +128,7 @@ for gencheck in range(0, runs):
     bestbaby = individual()
     bestbaby = population[0]
     for x in population:
-        if x.fitness > bestbaby.fitness:
+        if x.fitness < bestbaby.fitness:
             bestbaby = x
 
     population = copy.deepcopy(mutatedgenes)
@@ -134,7 +136,7 @@ for gencheck in range(0, runs):
     worsebaby = individual()
     worsebaby = population[0]
     for x in population:
-        if x.fitness < worsebaby.fitness:
+        if x.fitness > worsebaby.fitness:
             worsebaby = x
     worsebaby = bestbaby
     fitnessscore.append(totalfitmut)
@@ -146,7 +148,7 @@ for gencheck in range(0, runs):
 
     for x in population:
         popscorelist.append(x.fitness)
-        if x.fitness >= popbestscore:
+        if x.fitness <= popbestscore:
             popbestscore = x.fitness
 
     yaxis = np.append(yaxis, popbestscore)

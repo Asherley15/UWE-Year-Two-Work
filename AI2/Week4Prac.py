@@ -4,15 +4,15 @@ import random
 import numpy as np
 import copy
 import statistics
+import math
 
 N = 10
-P = 10
+P = 50
 fitnessscore = []
 totalfitmut = 0
 
 popscorelist = []
 avgscorelist = np.array([])
-popbestscore = N
 
 
 class individual:
@@ -29,7 +29,7 @@ avgaxis = np.array([])
 for gen in range(0, P):
     tempgene = []
     for y in range(0, N):
-        tempgene.append(random.random())
+        tempgene.append(random.uniform(-5.12, 5.12))
     newind = individual()
     newind.gene = tempgene.copy()
     population.append(newind)
@@ -38,15 +38,16 @@ for gen in range(0, P):
 def test_func(ind):
     fitness = 0
     for x in range(N):
-        fitness = fitness + ind.gene[x]
-    return fitness
+        fitness += (ind.gene[x]**2) - \
+            (10 * (math.cos((2 * (math.pi)) * ind.gene[x])))
+    return (10 * N) + fitness
 
 
 xaxis = np.array([])
 totalfitpop = 0
 genz = 0
-runs = 300
-
+runs = 100
+popbestscore = test_func(population[random.randrange(0, P)])
 
 for gencheck in range(0, runs):
     popscorelist = []
@@ -96,8 +97,7 @@ for gencheck in range(0, runs):
             offspring[i + 1].gene[k] = tempgene[k]
 
     mutatedgenes = []
-    mutrate = 0.3
-    mutcheck = 0
+    mutrate = 0.02
     alter = random.random()
     flip = 0.5
     for i in range(0, P):
@@ -131,8 +131,6 @@ for gencheck in range(0, runs):
         if x.fitness < bestbaby.fitness:
             bestbaby = x
 
-    population = copy.deepcopy(mutatedgenes)
-
     worsebaby = individual()
     worsebaby = population[0]
     for x in population:
@@ -140,6 +138,7 @@ for gencheck in range(0, runs):
             worsebaby = x
     worsebaby = bestbaby
     fitnessscore.append(totalfitmut)
+    population = copy.deepcopy(mutatedgenes)
 
     counter = -1
     for x in population:
@@ -159,7 +158,7 @@ for gencheck in range(0, runs):
     generation.append(gencheck)
 
     xaxis = np.append(xaxis, [genz])
-
+    print("in generation: ", gencheck, " avg best fitness is: ", popbestscore)
     plt.plot(xaxis, yaxis, avgscorelist)
 
 z = 0
@@ -167,5 +166,5 @@ z = 0
 plt.xlabel('Generations Ran')
 plt.ylabel("Fitness")
 plt.title("Fitness (Best and Average)")
-
+print(population[2].gene)
 plt.show()

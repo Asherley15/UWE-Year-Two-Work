@@ -7,7 +7,7 @@ import statistics
 import math
 
 # Initialise population (P) and geneome length(N)
-N = 20
+N = 10
 P = 50
 
 # Declare NP array to hold the average fitness of generations, best score and X axis (no of gens ran)
@@ -60,7 +60,7 @@ for x in population:
         popbestscore = test_func(x)
 
 # Set Mutation rate
-mutrate = 0.04
+mutrate = 0.03
 
 ################PRIMARY LOOP BEGINS####################
 for gencheck in range(0, 100):
@@ -149,13 +149,15 @@ for gencheck in range(0, 100):
     bestscorelist = np.append(bestscorelist, popbestscore)
 
     avgscorelist = np.append(avgscorelist, statistics.mean(popscorelist))
-    print(gencheck)
+    print(gencheck, ": ", popbestscore)
+
     xaxis = np.append(xaxis, [gencheck])
     #print("in generation: ", gencheck, " avg best fitness is: ", popbestscore)
     plt.plot(xaxis, bestscorelist, avgscorelist)
 
+    for x in population:
+        print(x.gene)
 plt.xlabel('Generations Ran')
 plt.ylabel("Fitness")
 plt.title("Fitness (Best and Average)")
-print(population[2].gene)
 plt.show()

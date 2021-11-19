@@ -1,4 +1,46 @@
-     for gen in range(0, P):
+
+from matplotlib import pyplot as plt
+import random
+import matplotlib
+import numpy as np
+import copy
+import statistics
+import math
+from tabulate import tabulate
+# Initialise population (P) and geneome length(N)
+N = 10
+P = 50
+runavg = []
+# Declare NP array to hold the average fitness of generations, best score and X axis (no of gens ran)
+avgscorelist = np.array([])
+bestscorelist = np.array([])
+xaxis = np.array([])
+timer = 0
+# Define the inidividual gene class.
+
+
+class individual:
+    def __init__(self):
+        self.gene = [0] * N
+        self.fitness = 0
+
+
+# Create an individual.
+newind = individual()
+# Set Mutation rate
+mutrate = 0.00
+genbest = []
+mutrateofgen = []
+
+# Create population array
+population = []
+for j in range(10):
+    mutrate += 0.01
+    lastofgenaverage = []
+    for k in range(10):
+        # loop through population size and create p number total individuals.
+        for gen in range(0, P):
+            timer += 1
             tempgene = []
             # within each individual assign a random gene value given below (-5.12-5.12)
             for y in range(0, N):
@@ -112,8 +154,17 @@
 
             avgscorelist = np.append(
                 avgscorelist, statistics.mean(popscorelist))
-            print(gencheck, ": ", popbestscore)
 
             xaxis = np.append(xaxis, [gencheck])
             if gencheck == P:
                 genbest.append(popbestscore)
+        lastofgenaverage.append(popbestscore)
+    mutrateofgen.append(mutrate)
+
+    counter = 0
+
+    avgofgenscores = statistics.mean(lastofgenaverage)
+    runavg.append(avgofgenscores)
+
+mydata = [mutrateofgen, runavg]
+print(tabulate(mydata))

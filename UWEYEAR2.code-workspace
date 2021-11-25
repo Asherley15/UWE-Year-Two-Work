@@ -2,6 +2,9 @@
   "folders": [
     {
       "path": "."
+    },
+    {
+      "path": "../../../Desktop/ASD assignement"
     }
   ],
   "settings": {}

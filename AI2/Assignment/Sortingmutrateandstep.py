@@ -6,6 +6,7 @@ import copy
 import statistics
 import math
 from tabulate import *
+import json
 N = 10
 P = 50
 fitnessscore = []
@@ -29,7 +30,18 @@ yaxis = np.array([])
 avgaxis = np.array([])
 
 mutrate = 0.00
-mutstep = 1.2
+mutstep = 0.00
+startingmutrate = mutrate
+startingmutstep = mutstep
+numbertoavgover = int(input("Number of generation runs to average over: "))
+mutstepincreases = int(input("Enter No of Mutstep increments:"))
+mutstepincrement = float(input("Enter the value of each Mutstep increment: "))
+mutrateincreases = int(input("Enter No of Mutrate increments:"))
+mutrateincrement = float(input("Enter the value of each Mutrate increment: "))
+runs = int(input("Enter the number of generations to run for: "))
+
+GAsettings = {"Starting mutrate: ": startingmutrate, "Starting mutstep": startingmutstep, "Number of runs to average over": numbertoavgover,
+              "No of mutstep increases": mutstepincreases, "No of mutrate increases": mutrateincreases, "Size of mutrate increases": mutrateincrement, "Size of mutstep": mutstepincrement, "Number of generations": runs}
 
 
 def test_func(ind):
@@ -40,18 +52,15 @@ def test_func(ind):
     return (10 * N) + fitness
 
 
-numbertoavgover = 2
 run = 0
-
-xaxis = np.array([])
+count = 0
 totalfitpop = 0
-genz = 0
-runs = 100
-for a in range(3):
-    mutstep += 0.2
-    for z in range(10):
+
+for a in range(mutstepincreases):
+    mutstep += mutstepincrement
+    for z in range(mutrateincreases):
         if mutrate < 0.099:
-            mutrate += 0.01
+            mutrate += mutrateincrement
         else:
             mutrate = 0.01
         for x in range(numbertoavgover):
@@ -67,7 +76,7 @@ for a in range(3):
                 popbestscore = test_func(population[0])
             for currentrun in range(0, runs):
                 popscorelist = []
-                genz += 1
+
                 counter = -1
                 for x in population:
                     counter += 1
@@ -85,20 +94,20 @@ for a in range(3):
                         offspring.append(off1)
                     counter = -1
 
-                for x in offspring:
-                    counter += 1
-                    offspring[counter].fitness = test_func(x)
-                totalfitpop = 0
-                totalfitoff = 0
+                # for x in offspring:
+                #     counter += 1
+                #     offspring[counter].fitness = test_func(x)
+                # totalfitpop = 0
+                # totalfitoff = 0
 
-                counter = -1
-                for x in population:
-                    counter += 1
-                    totalfitpop += population[counter].fitness
-                counter = -1
-                for x in offspring:
-                    counter += 1
-                    totalfitoff += offspring[counter].fitness
+                # counter = -1
+                # for x in population:
+                #     counter += 1
+                #     totalfitpop += population[counter].fitness
+                # counter = -1
+                # for x in offspring:
+                #     counter += 1
+                #     totalfitoff += offspring[counter].fitness
 
                 crosspoint = random.randint(0, N - 1)
                 z = 0
@@ -135,10 +144,6 @@ for a in range(3):
                 totalfitmut = 0
                 counter = -1
 
-                for x in mutatedgenes:
-                    counter += 1
-                    totalfitmut += test_func(x)
-
                 bestbaby = individual()
                 bestbaby = population[0]
                 for x in population:
@@ -159,6 +164,7 @@ for a in range(3):
                     counter += 1
                     population[counter].fitness = test_func(x)
 
+                print("BEST: ", popbestscore)
                 for x in population:
                     popscorelist.append(x.fitness)
                     if x.fitness <= popbestscore:
@@ -169,25 +175,27 @@ for a in range(3):
                 avgpopscore = statistics.mean(popscorelist)
                 avgscorelist = np.append(avgscorelist, avgpopscore)
 
-                xaxis = np.append(xaxis, [genz])
-                plt.plot(xaxis, yaxis, avgscorelist)
                 # print(currentrun, popbestscore)
-                print(popbestscore)
-            print(currentrun, popbestscore)
+                count += 1
+                print(count)
             bestofrun.append(popbestscore)
-            # for x in bestofrun:
-            #     print(x)
+            for x in bestofrun:
+                print(x)
             if len(bestofrun) == numbertoavgover:
                 averageofruns = statistics.mean(bestofrun)
+                print("avg:", averageofruns)
                 bestofrun.clear()
                 print("Still going...")
                 listofaverage.append(
                     ["{:10.2f}".format(mutrate), "{:10.2f}".format(mutstep), averageofruns])
-counter = 0
 
+
+f = open("/Users/ashleypearson/Documents/UWE/Year Two/AI2/Assignment/runresults.txt", "w")
+f.write("-----------------GA Results-----------------\nSettings as follows:\n")
+f.write(json.dumps(GAsettings) + "\n")
 npversion = np.array(listofaverage)
 table = tabulate(npversion, headers=[
-                 "Index", "Mustep", "Mutrate", "Best Fitness"], showindex="always", tablefmt="pretty")
+                 "Index", "Murate", "Mutstep", "Best Fitness"], showindex="always", tablefmt="pretty")
 print(table)
 currentbest = listofaverage[0]
 for x in listofaverage:
@@ -197,5 +205,12 @@ print("BEST:\nMutstep:" +
       str(currentbest[0]) + "Mutrate:" + str(currentbest[1]) + "Score:" + str(currentbest[2]))
 sorted = npversion[npversion[:, 2].argsort()]
 tablesorted = tabulate(sorted, headers=[
-    "Index", "Mustep", "Mutrate", "Best Fitness"], showindex="always", tablefmt="pretty")
+    "Index", "Mutrate", "Mutstep", "Best Fitness"], showindex="always", tablefmt="pretty")
 print(tablesorted)
+
+print("BEST:\nMutstep:" +
+      str(currentbest[0]) + "Mutrate:" + str(currentbest[1]) + "Score:" + str(currentbest[2]))
+f.write("Unsorted data:\n" + table + "\n")
+f.write("Sorted table: \n" + tablesorted + "\n")
+f.write(str(currentbest))
+f.close()

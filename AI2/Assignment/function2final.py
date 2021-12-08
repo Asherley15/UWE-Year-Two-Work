@@ -1,17 +1,16 @@
+
+from typing import final
 from matplotlib import pyplot as plt
 import random
 import numpy as np
 import copy
 import statistics
 import math
-from numpy.core.fromnumeric import argsort
+from numpy.core.fromnumeric import size, sort
 from tabulate import *
 import json
 import time
-
-global N, P
-N = 20
-P = 50
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class individual:
@@ -20,11 +19,21 @@ class individual:
         self.fitness = 0
 
 
-def pop_initialise(population):
+global N, P
+N = 20
+P = 50
+
+np.set_printoptions(precision=5, suppress=True)
+
+
+def selection():
+
+
+def pop_init():
     for gen in range(0, P):
         tempgene = []
         for y in range(0, N):
-            tempgene.append(random.uniform(-5, 5))
+            tempgene.append(random.uniform(-10, 10))
         newind = individual()
         newind.gene = tempgene.copy()
         population.append(newind)
@@ -33,32 +42,29 @@ def pop_initialise(population):
 
 def test_func(ind, N):
     fitness = 0
-    for x in range(N):
-        fitness += (ind.gene[x]**4 - 16 * ind.gene[x]**2 + 5 * ind.gene[x])
-    return fitness / 2
-
-
-fitnessscore = []
-
-bestofrun = []
-popscorelist = []
-avgscorelist = np.array([])
-listofaverage = []
-np.set_printoptions(precision=5, suppress=True)
+    fitnesstotal = 0
+    fitnessarray = []
+    first = (ind.gene[0] - 1)**2
+    for i in range(1, N):
+        fitness += i * (((2 * ind.gene[i]**2) - (ind.gene[i - 1]))**2)
+        fitness = fitness + first
+        fitnessarray.append(fitness)
+        fitnesstotal += fitness
+    return fitnessarray, fitnesstotal, fitness
 
 
 def scoreplotter(N, P, test_func, mutrate, mutstep):
-
     popscorelist = []
     avgscorelist = []
 
     newind = individual()
     population = []
     yaxis = []
-    population = (pop_initialise(population))
+
+    population = pop_init()
 
     xaxis = []
-    totalfitpop = 0
+
     genz = 0
     runs = 100
     popbestscore = test_func(population[0], N)
@@ -67,9 +73,11 @@ def scoreplotter(N, P, test_func, mutrate, mutstep):
         popscorelist = []
         genz += 1
         counter = -1
+
         for x in population:
             counter += 1
-            population[counter].fitness = test_func(x, N)
+            fitscore = test_func(x, N)
+            population[counter].fitness = fitscore[2]
 
         offspring = []
         for i in range(0, P):
@@ -84,23 +92,7 @@ def scoreplotter(N, P, test_func, mutrate, mutstep):
                 offspring.append(off1)
             counter = -1
 
-        for x in offspring:
-            counter += 1
-            offspring[counter].fitness = test_func(x, N)
-        totalfitpop = 0
-        totalfitoff = 0
-
-        counter = -1
-        for x in population:
-            counter += 1
-            totalfitpop += population[counter].fitness
-        counter = -1
-        for x in offspring:
-            counter += 1
-            totalfitoff += offspring[counter].fitness
-
         crosspoint = random.randint(0, N - 1)
-        z = 0
 
         for i in range(0, P, 2):
 
@@ -121,24 +113,24 @@ def scoreplotter(N, P, test_func, mutrate, mutstep):
                 if (mutprob) < (mutrate):
                     if random.random() < flip:
                         gene += mutstep
-                        if gene > 5:
-                            gene = 5
+                        if gene > 10:
+                            gene = 10
                     else:
                         gene -= mutstep
-                        if gene < -5:
-                            gene = -5
+                        if gene < -10:
+                            gene = -10
                 newind.gene.append(gene)
             mutatedgenes.append(newind)
 
-        totalfitmut = 0
         counter = -1
 
         for x in mutatedgenes:
-            counter += 1
-            totalfitmut += test_func(x, N)
+            fitscore = test_func(x, N)
+            x.fitness = fitscore[2]
 
         worsebaby = mutatedgenes[0]
         bestbaby = mutatedgenes[0]
+
         for x in mutatedgenes:
             if x.fitness < bestbaby.fitness:
                 bestbaby = x
@@ -147,16 +139,17 @@ def scoreplotter(N, P, test_func, mutrate, mutstep):
             if x.fitness > worsebaby.fitness:
                 worsebaby = x
         indexno = mutatedgenes.index(worsebaby)
-        mutatedgenes[indexno] = bestbaby
-        fitnessscore.append(totalfitmut)
+        mutatedgenes[0] = bestbaby
         population = copy.deepcopy(mutatedgenes)
 
         counter = -1
-        for x in population:
-            counter += 1
-            population[counter].fitness = test_func(x, N)
+
+        popbestscore = population[0].fitness
 
         for x in population:
+            counter += 1
+            fitscore = test_func(x, N)
+            x.fitness = fitscore[2]
             popscorelist.append(x.fitness)
             if x.fitness <= popbestscore:
                 popbestscore = x.fitness
@@ -199,24 +192,23 @@ yaxis = np.array([])
 avgaxis = np.array([])
 
 mutrate = 0.0
-noofmutrateincreases = 10
-mutrateincrement = 0.01
+noofmutrateincreases = 25
+mutrateincrement = 0.005
 mutstep = 0.0
-noofmutstepincreases = 20
-mutstepincrement = 0.1
-
-
+noofmutstepincreases = 30
+mutstepincrement = 0.15
 startingmutrate = mutrate
 startingmutstep = mutstep
+
 numbertoavgover = int(input("Number of generation runs to average over: "))
 runs = int(input("Enter the number of generations to run for: "))
-printcheck = input("Do you wish to save this run to text file?: Y/N ")
 
 GAsettings = {"Starting mutrate: ": startingmutrate, "Starting mutstep": startingmutstep, "Number of runs to average over": numbertoavgover,
               "No of mutstep increases": noofmutstepincreases, "No of mutrate increases": noofmutrateincreases, "Size of mutrate increases": mutrateincrement, "Size of mutstep": mutstepincrement, "Number of generations": runs}
 
+bestofrun = []
+listofaverage = []
 
-run = 0
 count = 0
 totalfitpop = 0
 start = time.time()
@@ -226,18 +218,16 @@ for a in range(noofmutstepincreases):
     for z in range(noofmutrateincreases):
         mutrate += mutrateincrement
         for x in range(numbertoavgover):
-            run += 1
-            population = (pop_initialise(population))
-
-            popbestscore = test_func(population[0], N)
-            print(population[0])
+            population = pop_init()
+            fitscore = test_func(population[0], N)
+            popbestscore = fitscore[2]
             for currentrun in range(0, runs):
                 popscorelist = []
-
+                avgpopscore = []
                 counter = -1
                 for x in population:
-                    counter += 1
-                    population[counter].fitness = test_func(x, N)
+                    fitscore = test_func(x, N)
+                    x.fitness = fitscore[2]
                 offspring = []
                 for i in range(0, P):
                     parent1 = random.randint(0, P - 1)
@@ -274,17 +264,18 @@ for a in range(noofmutstepincreases):
                         if (mutprob) < (mutrate):
                             if random.random() < flip:
                                 gene += mutstep
-                                if gene > 5:
-                                    gene = 5
+                                if gene > 10:
+                                    gene = 10
                             else:
                                 gene -= mutstep
-                                if gene < -5:
-                                    gene = -5
+                                if gene < -10:
+                                    gene = -10
                         newind.gene.append(gene)
                     mutatedgenes.append(newind)
 
-                totalfitmut = 0
-                counter = -1
+                for x in mutatedgenes:
+                    fitscore = test_func(x, N)
+                    x.fitness = fitscore[2]
 
                 worsebaby = mutatedgenes[0]
                 bestbaby = mutatedgenes[0]
@@ -296,14 +287,13 @@ for a in range(noofmutstepincreases):
                     if x.fitness > worsebaby.fitness:
                         worsebaby = x
                 indexno = mutatedgenes.index(worsebaby)
-                mutatedgenes[indexno] = bestbaby
-                fitnessscore.append(totalfitmut)
+                mutatedgenes[0] = bestbaby
                 population = copy.deepcopy(mutatedgenes)
 
                 counter = -1
                 for x in population:
-                    counter += 1
-                    population[counter].fitness = test_func(x, N)
+                    fitscore = test_func(x, N)
+                    x.fitness = fitscore[2]
 
                 for x in population:
                     popscorelist.append(x.fitness)
@@ -313,7 +303,8 @@ for a in range(noofmutstepincreases):
                 yaxis = np.append(yaxis, popbestscore)
 
                 avgpopscore = statistics.mean(popscorelist)
-                avgscorelist = np.append(avgscorelist, avgpopscore)
+                count += 1
+                print(count)
 
                 # print(currentrun, popbestscore)
             bestofrun.append(popbestscore)
@@ -322,28 +313,26 @@ for a in range(noofmutstepincreases):
                 print("avg:", averageofruns)
                 bestofrun.clear()
                 print("Still going...")
+                print(avgpopscore)
                 listofaverage.append(
-                    ["{:10.3f}".format(mutrate), "{:10.3f}".format(mutstep), averageofruns])
-            count += 1
-            print(count)
+                    ["{:10.3f}".format(mutrate), "{:10.3f}".format(mutstep), float(averageofruns), float(avgpopscore)])
+
+
 end = time.time()
 elapsed = end - start
 
 sortedlist = sorted(listofaverage, key=lambda x: x[2])
-
-table = tabulate(listofaverage, headers=[
-    "Index", "Mutrate", "Mutstep", "Best Fitness"], showindex="always", tablefmt="pretty")
-
-currentbest = listofaverage[0]
-for x in listofaverage:
-    if x[2] < currentbest[2]:
+# sortedlist = npversion[np.argsort(npversion[:, 2])]
+currentbest = sortedlist[0]
+for x in sortedlist:
+    if x[2] < sortedlist[0][2]:
         currentbest = x
+table = tabulate(listofaverage, headers=[
+                 "Mutrate", "Mutstep", "Best Fitness", "Avg Fitness of gen 100"], tablefmt="pretty")
 
-# sorted = npversion[npversion[:, 2].argsort()]
-
-
+# sortedlist = npversion[npversion[:, 2].argsort()]
 tablesorted = tabulate(sortedlist, headers=[
-    "Index", "Mutrate", "Mutstep", "Best Fitness"], showindex="always", tablefmt="pretty")
+                       "Mutrate", "Mutstep", "Best Fitness", "Avg Fitness of gen 100"], showindex="always", tablefmt="pretty")
 print(tablesorted)
 
 print("BEST:\nMutstep:" +
@@ -353,24 +342,21 @@ topperformers = []
 for i in range(10):
     topperformers.append(sortedlist[i])
 
-for x in topperformers:
-    print("CHECK:", x)
 toptable = tabulate(topperformers, headers=[
     "Index", "Mutrate", "Mutstep", "Best Fitness"], showindex="always", tablefmt="pretty")
-if printcheck == "Y" or "y" or "yes":
-    f = open(
-        "/Users/ashleypearson/Documents/UWE/Year Two/AI2/Assignment/runresults.txt", "w")
-    f.write("-----------------GA Results-----------------\nSettings as follows:\n")
-    f.write(json.dumps(GAsettings) + "\n")
-    f.write("Unsorted data:\n" + table + "\n")
-    f.write("Sorted table: \n" + tablesorted + "\n")
-    f.write(str(currentbest) + "\nTime to run: " +
-            str(elapsed / 60) + " minutes")
-    f.write("\nTop 10 performers to further investigate: \n" + toptable + "\n")
+
+f = open(
+    "/Users/ashleypearson/Documents/UWE/Year Two/AI2/Assignment/runresults.txt", "w")
+f.write("-----------------GA Results-----------------\nSettings as follows:\n")
+f.write(json.dumps(GAsettings) + "\n")
+f.write("Unsorted data:\n" + table + "\n")
+f.write("Sorted table: \n" + tablesorted + "\n")
+f.write(str(currentbest) + "\nTime to run: " +
+        str(elapsed / 60) + " minutes")
+f.write("\nTop 10 performers to further investigate: \n" + toptable + "\n")
 
 finalresults = []
 for x in topperformers:
-    print(x[0])
     toptenrun = scoreplotter(N, P, test_func, float(x[0]), float(x[1]))
     avgoftenavgs = statistics.mean(avgrunfinal)
     avgoftenbests = statistics.mean(bestrunfinal)
@@ -387,27 +373,15 @@ plt.title("Fitness (Best and Average) of 10 best performers")
 plt.show()
 
 
-def fitness_scatter_plotter(ind, N):
-    fitness = 0
-    fitnesstotal = 0
-    fitnessarray = []
-    for x in range(N):
-        fitness = (ind.gene[x]**4 - 16 * ind.gene[x]**2 + 5 * ind.gene[x]) / 2
-        fitnessarray.append(fitness)
-        fitnesstotal += fitness
-    return fitnessarray, fitnesstotal
-
-
 randomind = individual()
 population = []
 tempgene = []
-
 for y in range(0, N):
-    tempgene.append(random.uniform(-5, 5))
+    tempgene.append(random.uniform(-10, 10))
 randomind.gene = tempgene.copy()
 
-run = fitness_scatter_plotter(toptenrun[5], N)
-runrandom = fitness_scatter_plotter(randomind, N)
+run = test_func(toptenrun[5], N)
+runrandom = test_func(randomind, N)
 
 fig = plt.figure()
 
@@ -416,16 +390,20 @@ for x in range(3):
     population = []
     tempgene = []
     for y in range(0, N):
-        rando = random.uniform(-5, 5)
+        rando = random.uniform(-10, 10)
         tempgene.append(rando)
         print(rando)
-
     randomind.gene = tempgene.copy()
-    xaxis = randomind.gene
-    runrandom = fitness_scatter_plotter(randomind, N)
+    xaxis = []
+    for x in range(1, 20):
+        xaxis.append(randomind.gene[x])
+    runrandom = test_func(randomind, N)
+    print(len(xaxis), len(runrandom[0]))
     plt.scatter(xaxis, runrandom[0], label=(
         "Random individual number: " + str(x) + "Total Ind fitness: " + "{:10.3f}".format(runrandom[1])))
-xaxis = toptenrun[5].gene
+xaxis = []
+for x in range(1, 20):
+    xaxis.append(toptenrun[5].gene[x])
 yaxis = run
 runtotal = []
 randomtotal = []
@@ -439,6 +417,7 @@ print(runtotal)
 
 plt.scatter(xaxis, run[0], marker='s', c='black',
             label="Top performer total fitness: " + "{:10.3f}".format(run[1]))
+plt.ticklabel_format(style="plain")
 plt.legend()
 plt.ylabel("Fitness")
 plt.xlabel("Individual gene value")

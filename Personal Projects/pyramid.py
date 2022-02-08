@@ -5,4 +5,4 @@ for i in range(height):
     for i in range(size):
         print('*', end=" ")
     size -= 1
-    if size == 1:
+    # if size == 1:

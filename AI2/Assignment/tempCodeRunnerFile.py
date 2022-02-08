@@ -1,1 +1,0 @@
-avgofgenscores = statistics.mean(lastofgenaverage)

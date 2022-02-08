@@ -7,5 +7,8 @@
       "path": "../../../Desktop/ASD assignement"
     }
   ],
-  "settings": {}
+  "settings": {
+    "git.ignoreLimitWarning": true,
+    "liveServer.settings.multiRootWorkspaceName": "Year Two"
+  }
 }
